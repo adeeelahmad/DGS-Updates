@@ -1,0 +1,319 @@
+<!-- Revenue Leak Calculator: paste this whole file into a custom HTML/code block on any page.
+     Settings live on the .rlc element below:
+       data-webhook  = URL that receives the lead form as JSON (e.g. a GoHighLevel inbound webhook). Leave empty until connected.
+       data-booking  = calendar link shown after the results (e.g. your GHL booking page). Optional.
+       data-brand    = your agency name.
+       data-lock="light" keeps the calculator light even when a visitor's device is in dark mode. Remove it to follow the device. -->
+<style>
+.rlc{
+  --rlc-bg:#f6f8f8; --rlc-surface:#ffffff; --rlc-ink:#15222b; --rlc-muted:#566570; --rlc-line:#d7dfe3;
+  --rlc-accent:#0b6e63; --rlc-accent-ink:#ffffff; --rlc-accent-soft:#e2f0ed; --rlc-leak:#b4441f; --rlc-leak-soft:#fbe9e1;
+  --rlc-font:"IBM Plex Sans","Segoe UI",system-ui,-apple-system,sans-serif;
+  --rlc-display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --rlc-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  background:var(--rlc-bg); color:var(--rlc-ink); font-family:var(--rlc-font); font-size:16px; line-height:1.55;
+  border-radius:14px; padding:clamp(16px,3vw,32px); max-width:1040px; margin:0 auto; box-sizing:border-box;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .rlc:not([data-lock="light"]){
+    --rlc-bg:#0f171c; --rlc-surface:#152028; --rlc-ink:#e3eaee; --rlc-muted:#9aabb5; --rlc-line:#26353f;
+    --rlc-accent:#4fc3b2; --rlc-accent-ink:#0b1a17; --rlc-accent-soft:#12302b; --rlc-leak:#f08a62; --rlc-leak-soft:#33201a; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"] .rlc:not([data-lock="light"]){
+  --rlc-bg:#0f171c; --rlc-surface:#152028; --rlc-ink:#e3eaee; --rlc-muted:#9aabb5; --rlc-line:#26353f;
+  --rlc-accent:#4fc3b2; --rlc-accent-ink:#0b1a17; --rlc-accent-soft:#12302b; --rlc-leak:#f08a62; --rlc-leak-soft:#33201a; color-scheme:dark;
+}
+.rlc *,.rlc *::before,.rlc *::after{box-sizing:border-box}
+.rlc [hidden]{display:none!important}
+.rlc h2,.rlc h3{font-family:var(--rlc-display); margin:0; line-height:1.15; text-wrap:balance}
+.rlc h2{font-size:clamp(26px,4vw,36px)}
+.rlc h3{font-size:18px}
+.rlc p{margin:0}
+.rlc .rlc-eyebrow{font-family:var(--rlc-mono); font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--rlc-accent)}
+.rlc .rlc-intro{display:grid; gap:8px; margin-bottom:24px; max-width:70ch}
+.rlc .rlc-intro p{color:var(--rlc-muted)}
+.rlc .rlc-cols{display:grid; gap:24px; grid-template-columns:1fr}
+@media (min-width:860px){ .rlc .rlc-cols{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr)} }
+.rlc .rlc-card{background:var(--rlc-surface); border:1px solid var(--rlc-line); border-radius:12px; padding:20px; display:grid; gap:16px; min-width:0}
+.rlc fieldset{border:0; padding:0; margin:0; display:grid; gap:12px; min-width:0}
+.rlc legend{font-family:var(--rlc-mono); font-size:11.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--rlc-muted); padding:0; margin-bottom:4px}
+.rlc .rlc-row{display:grid; gap:12px; grid-template-columns:1fr}
+@media (min-width:520px){ .rlc .rlc-row.two{grid-template-columns:1fr 1fr} }
+.rlc label{display:grid; gap:4px; font-size:14px; font-weight:500}
+.rlc .rlc-hint{font-size:12.5px; color:var(--rlc-muted); font-weight:400}
+.rlc input,.rlc select{font:inherit; font-size:15px; color:var(--rlc-ink); background:var(--rlc-bg); border:1px solid var(--rlc-line); border-radius:8px; padding:9px 11px; width:100%; min-width:0}
+.rlc input:focus-visible,.rlc select:focus-visible,.rlc button:focus-visible,.rlc summary:focus-visible,.rlc a:focus-visible{outline:2px solid var(--rlc-accent); outline-offset:2px}
+.rlc .rlc-prefix{position:relative}
+.rlc .rlc-prefix span{position:absolute; left:11px; top:50%; transform:translateY(-50%); color:var(--rlc-muted); pointer-events:none}
+.rlc .rlc-prefix input{padding-left:24px}
+.rlc details{border-top:1px solid var(--rlc-line); padding-top:12px}
+.rlc summary{cursor:pointer; font-size:14px; font-weight:500; color:var(--rlc-accent)}
+.rlc details[open] summary{margin-bottom:12px}
+.rlc .rlc-total{background:var(--rlc-leak-soft); border-radius:10px; padding:16px 18px; display:grid; gap:4px}
+.rlc .rlc-total .k{font-size:14px; color:var(--rlc-muted)}
+.rlc .rlc-total .v{font-family:var(--rlc-display); font-size:clamp(34px,6vw,48px); font-weight:700; color:var(--rlc-leak); font-variant-numeric:tabular-nums; line-height:1.05}
+.rlc .rlc-total .y{font-family:var(--rlc-mono); font-size:13.5px; color:var(--rlc-ink); font-variant-numeric:tabular-nums}
+.rlc .rlc-bars{display:grid; gap:12px; list-style:none; padding:0; margin:0}
+.rlc .rlc-bars li{display:grid; gap:4px}
+.rlc .rlc-bars .top{display:flex; justify-content:space-between; gap:12px; font-size:14px}
+.rlc .rlc-bars .amt{font-family:var(--rlc-mono); font-variant-numeric:tabular-nums; white-space:nowrap}
+.rlc .rlc-bars .track{height:8px; background:var(--rlc-bg); border-radius:99px; overflow:hidden}
+.rlc .rlc-bars .fill{height:100%; background:var(--rlc-leak); border-radius:99px; width:0; transition:width .3s ease}
+.rlc .rlc-bars .why{font-size:12.5px; color:var(--rlc-muted)}
+.rlc .rlc-note{font-size:12.5px; color:var(--rlc-muted)}
+.rlc .rlc-btn{font:inherit; font-weight:600; font-size:15px; border:0; border-radius:8px; padding:12px 18px; cursor:pointer; background:var(--rlc-accent); color:var(--rlc-accent-ink); text-decoration:none; display:inline-block; text-align:center}
+.rlc .rlc-btn[disabled]{opacity:.6; cursor:default}
+.rlc .rlc-check{display:grid; grid-template-columns:20px minmax(0,1fr); gap:8px; align-items:start; font-weight:400; font-size:12.5px; color:var(--rlc-muted)}
+.rlc .rlc-check input{width:18px; height:18px; margin:2px 0 0; padding:0}
+.rlc .rlc-status{font-size:14px; padding:10px 12px; border-radius:8px; background:var(--rlc-accent-soft)}
+.rlc .rlc-status.err{background:var(--rlc-leak-soft)}
+@media (prefers-reduced-motion:reduce){ .rlc .rlc-bars .fill{transition:none} }
+</style>
+
+<div class="rlc" data-webhook="" data-booking="" data-brand="[Brand]" data-lock="light">
+  <div class="rlc-intro">
+    <span class="rlc-eyebrow">Free Revenue Leak Calculator</span>
+    <h2>How much revenue is your business losing every month?</h2>
+    <p>Enter a few numbers from a normal month. The calculator estimates what you're losing to missed calls, slow follow-up, no-shows and past customers who never came back. It takes about 2 minutes.</p>
+  </div>
+
+  <div class="rlc-cols">
+    <form class="rlc-card rlc-inputs" novalidate>
+      <fieldset>
+        <legend>Your business</legend>
+        <label for="rlc-industry">Industry
+          <select id="rlc-industry" name="industry">
+            <option value="home">HVAC, plumbing or electrical</option>
+            <option value="roofing">Roofing or remodeling</option>
+            <option value="medspa">Med spa or aesthetics</option>
+            <option value="dental">Dental</option>
+            <option value="chiro">Chiropractic or physical therapy</option>
+            <option value="law">Law firm</option>
+            <option value="other">Other service business</option>
+          </select>
+          <span class="rlc-hint">Choosing an industry fills in typical example numbers. Change any of them to match yours.</span>
+        </label>
+        <label for="rlc-value">Average value of a new customer
+          <span class="rlc-prefix"><span>$</span><input id="rlc-value" name="value" type="number" inputmode="decimal" min="0" step="50"></span>
+          <span class="rlc-hint">What a typical new customer spends with you in their first year.</span>
+        </label>
+        <label for="rlc-close">Close rate on leads you actually talk to (%)
+          <input id="rlc-close" name="close" type="number" inputmode="decimal" min="0" max="100" step="1">
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Phone calls</legend>
+        <div class="rlc-row two">
+          <label for="rlc-calls">New-customer calls per month
+            <input id="rlc-calls" name="calls" type="number" inputmode="numeric" min="0" step="5">
+          </label>
+          <label for="rlc-missed">Calls that go unanswered (%)
+            <input id="rlc-missed" name="missed" type="number" inputmode="decimal" min="0" max="100" step="1">
+            <span class="rlc-hint">Include after-hours and busy times.</span>
+          </label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Web forms and messages</legend>
+        <div class="rlc-row two">
+          <label for="rlc-forms">Form and message leads per month
+            <input id="rlc-forms" name="forms" type="number" inputmode="numeric" min="0" step="5">
+          </label>
+          <label for="rlc-speed">How fast you usually reply
+            <select id="rlc-speed" name="speed">
+              <option value="fast">Under 5 minutes</option>
+              <option value="hour">5 to 60 minutes</option>
+              <option value="day">1 to 24 hours</option>
+              <option value="slow">More than a day</option>
+            </select>
+          </label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Appointments and past customers</legend>
+        <div class="rlc-row two">
+          <label for="rlc-appts">Appointments or estimates per month
+            <input id="rlc-appts" name="appts" type="number" inputmode="numeric" min="0" step="5">
+          </label>
+          <label for="rlc-noshow">No-shows and cancellations (%)
+            <input id="rlc-noshow" name="noshow" type="number" inputmode="decimal" min="0" max="100" step="1">
+          </label>
+        </div>
+        <label for="rlc-past">Past customers you have contact details for
+          <input id="rlc-past" name="past" type="number" inputmode="numeric" min="0" step="50">
+        </label>
+      </fieldset>
+
+      <details>
+        <summary>Assumptions behind the estimate</summary>
+        <div class="rlc-row two">
+          <label for="rlc-a-noreturn">Missed callers who never call back (%)
+            <input id="rlc-a-noreturn" name="a_noreturn" type="number" min="0" max="100" step="1" value="60">
+          </label>
+          <label for="rlc-a-recover">No-shows a reminder and rebooking system could recover (%)
+            <input id="rlc-a-recover" name="a_recover" type="number" min="0" max="100" step="1" value="50">
+          </label>
+          <label for="rlc-a-react">Past customers who buy again each month from a comeback campaign (%)
+            <input id="rlc-a-react" name="a_react" type="number" min="0" max="100" step="0.1" value="0.5">
+            <span class="rlc-hint">Filled in by industry: lower where customers rarely buy twice (roofing, law).</span>
+          </label>
+          <label for="rlc-a-slow">Leads lost to your reply speed (%)
+            <input id="rlc-a-slow" name="a_slow" type="number" min="0" max="100" step="1">
+            <span class="rlc-hint">Filled in from your reply speed: under 5 min 0%, up to 1 hour 10%, up to a day 25%, longer 40%.</span>
+          </label>
+        </div>
+        <p class="rlc-note">These are planning assumptions, not industry statistics. Change them to match what you see in your own business.</p>
+      </details>
+    </form>
+
+    <div class="rlc-card rlc-results" aria-live="polite">
+      <div class="rlc-total">
+        <span class="k">Estimated revenue leaking each month</span>
+        <span class="v" data-out="month">$0</span>
+        <span class="y" data-out="year">$0 a year</span>
+      </div>
+      <ul class="rlc-bars">
+        <li><div class="top"><span>Missed calls</span><span class="amt" data-out="calls">$0</span></div><div class="track"><div class="fill" data-bar="calls"></div></div><span class="why" data-why="calls"></span></li>
+        <li><div class="top"><span>Slow follow-up</span><span class="amt" data-out="slow">$0</span></div><div class="track"><div class="fill" data-bar="slow"></div></div><span class="why" data-why="slow"></span></li>
+        <li><div class="top"><span>No-shows</span><span class="amt" data-out="noshow">$0</span></div><div class="track"><div class="fill" data-bar="noshow"></div></div><span class="why" data-why="noshow"></span></li>
+        <li><div class="top"><span>Past customers not coming back</span><span class="amt" data-out="react">$0</span></div><div class="track"><div class="fill" data-bar="react"></div></div><span class="why" data-why="react"></span></li>
+      </ul>
+      <p class="rlc-note">This is an estimate based on the numbers and assumptions you entered, not a promise of results. A free Revenue Leak Audit checks the real numbers: we call your business during and after hours, test your web form, and compare your reviews with your top competitors.</p>
+
+      <form class="rlc-lead" novalidate>
+        <h3>Get your free Revenue Leak Audit</h3>
+        <div class="rlc-row two">
+          <label for="rlc-name">Your name<input id="rlc-name" name="name" autocomplete="name" required></label>
+          <label for="rlc-business">Business name<input id="rlc-business" name="business" autocomplete="organization" required></label>
+          <label for="rlc-email">Email<input id="rlc-email" name="email" type="email" autocomplete="email" required></label>
+          <label for="rlc-phone">Phone<input id="rlc-phone" name="phone" type="tel" autocomplete="tel"></label>
+        </div>
+        <label for="rlc-site">Website<input id="rlc-site" name="website" type="url" inputmode="url" placeholder="https://"></label>
+        <label class="rlc-check" for="rlc-consent"><input id="rlc-consent" name="consent" type="checkbox">
+          <span>I agree that <span data-brand-name>[Brand]</span> may contact me about my audit by phone, text or email, including automated texts. Consent isn't a condition of any purchase. Message and data rates may apply. Reply STOP to opt out.</span>
+        </label>
+        <button class="rlc-btn" type="submit">Send me my audit</button>
+        <p class="rlc-status" hidden></p>
+        <a class="rlc-btn rlc-book" href="#" target="_blank" rel="noopener" hidden>Book your audit call now</a>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var root = document.currentScript ? document.currentScript.previousElementSibling : null;
+  if (!root || !root.classList.contains('rlc')) root = document.querySelector('.rlc');
+  if (!root) return;
+
+  // Example starting numbers per industry. Visitors overwrite them with their own.
+  var PRESETS = {
+    home:    {value:900,  close:45, calls:220, missed:25, forms:40, speed:'day',  appts:160, noshow:10, past:2500, react:0.5},
+    roofing: {value:9000, close:25, calls:90,  missed:25, forms:30, speed:'day',  appts:60,  noshow:12, past:800,  react:0.1},
+    medspa:  {value:1200, close:40, calls:150, missed:30, forms:60, speed:'day',  appts:220, noshow:15, past:1800, react:1},
+    dental:  {value:1500, close:50, calls:180, missed:25, forms:35, speed:'day',  appts:300, noshow:12, past:3000, react:0.5},
+    chiro:   {value:1000, close:50, calls:120, missed:25, forms:30, speed:'day',  appts:400, noshow:12, past:1500, react:0.7},
+    law:     {value:5000, close:25, calls:100, missed:30, forms:40, speed:'hour', appts:40,  noshow:15, past:600,  react:0.1},
+    other:   {value:800,  close:40, calls:120, missed:25, forms:30, speed:'day',  appts:120, noshow:10, past:1000, react:0.5}
+  };
+  var SPEED_LOSS = {fast:0, hour:10, day:25, slow:40};
+
+  var form = root.querySelector('.rlc-inputs');
+  var $ = function(name){ return form.elements[name]; };
+  var num = function(name){ var v = parseFloat($(name).value); return isFinite(v) && v > 0 ? v : 0; };
+  var pct = function(name){ return Math.min(num(name), 100) / 100; };
+  var money = function(n){ return '$' + Math.round(n).toLocaleString('en-US'); };
+
+  root.querySelectorAll('[data-brand-name]').forEach(function(el){ el.textContent = root.dataset.brand || 'us'; });
+
+  function applyPreset(key){
+    var p = PRESETS[key] || PRESETS.other;
+    ['value','close','calls','missed','forms','appts','noshow','past'].forEach(function(k){ $(k).value = p[k]; });
+    $('speed').value = p.speed;
+    $('a_slow').value = SPEED_LOSS[p.speed];
+    $('a_react').value = p.react;
+  }
+
+  var last = {};
+  function calc(){
+    var value = num('value'), close = pct('close');
+    var leaks = {
+      calls:  num('calls') * pct('missed') * pct('a_noreturn') * close * value,
+      slow:   num('forms') * pct('a_slow') * close * value,
+      noshow: num('appts') * pct('noshow') * pct('a_recover') * close * value,
+      react:  num('past') * pct('a_react') * value
+    };
+    var total = leaks.calls + leaks.slow + leaks.noshow + leaks.react;
+    var max = Math.max(leaks.calls, leaks.slow, leaks.noshow, leaks.react, 1);
+    root.querySelector('[data-out="month"]').textContent = money(total);
+    root.querySelector('[data-out="year"]').textContent = money(total * 12) + ' a year';
+    Object.keys(leaks).forEach(function(k){
+      root.querySelector('[data-out="'+k+'"]').textContent = money(leaks[k]) + '/mo';
+      root.querySelector('[data-bar="'+k+'"]').style.width = (leaks[k] / max * 100).toFixed(1) + '%';
+    });
+    var lostCalls = Math.round(num('calls') * pct('missed') * pct('a_noreturn'));
+    var lostForms = Math.round(num('forms') * pct('a_slow'));
+    var lostShows = Math.round(num('appts') * pct('noshow') * pct('a_recover'));
+    var comebacks = Math.round(num('past') * pct('a_react'));
+    root.querySelector('[data-why="calls"]').textContent = 'About ' + lostCalls + ' callers a month hang up and try someone else.';
+    root.querySelector('[data-why="slow"]').textContent = 'About ' + lostForms + ' form leads a month go cold before you reply.';
+    root.querySelector('[data-why="noshow"]').textContent = 'About ' + lostShows + ' missed appointments a month could be rebooked.';
+    root.querySelector('[data-why="react"]').textContent = 'About ' + comebacks + ' past customers a month could be brought back.';
+    last = {leaks:leaks, total:total};
+  }
+
+  $('industry').addEventListener('change', function(){ applyPreset(this.value); calc(); });
+  $('speed').addEventListener('change', function(){ $('a_slow').value = SPEED_LOSS[this.value]; calc(); });
+  form.addEventListener('input', calc);
+  form.addEventListener('submit', function(e){ e.preventDefault(); });
+  applyPreset($('industry').value);
+  calc();
+
+  // Lead form
+  var lead = root.querySelector('.rlc-lead');
+  var status = lead.querySelector('.rlc-status');
+  var book = lead.querySelector('.rlc-book');
+  var btn = lead.querySelector('button[type="submit"]');
+  function show(msg, isErr){ status.textContent = msg; status.classList.toggle('err', !!isErr); status.hidden = false; }
+
+  lead.addEventListener('submit', function(e){
+    e.preventDefault();
+    var f = lead.elements;
+    if (!f.name.value.trim() || !f.business.value.trim() || !f.email.value.trim() || !f.email.checkValidity()){
+      show('Please add your name, business name and a valid email.', true); return;
+    }
+    var hook = (root.dataset.webhook || '').trim();
+    if (!hook){
+      show('This form isn\'t connected yet. The site owner needs to add a webhook address to the calculator settings.', true); return;
+    }
+    var payload = {
+      source: 'revenue-leak-calculator',
+      name: f.name.value.trim(), business: f.business.value.trim(), email: f.email.value.trim(),
+      phone: f.phone.value.trim(), website: f.website.value.trim(), consent_to_contact: f.consent.checked,
+      industry: $('industry').value,
+      inputs: {customer_value:num('value'), close_rate_pct:num('close'), calls_per_month:num('calls'), missed_pct:num('missed'),
+               form_leads_per_month:num('forms'), reply_speed:$('speed').value, appointments_per_month:num('appts'),
+               no_show_pct:num('noshow'), past_customers:num('past')},
+      estimate_monthly: Math.round(last.total),
+      estimate_by_leak: {missed_calls:Math.round(last.leaks.calls), slow_follow_up:Math.round(last.leaks.slow),
+                         no_shows:Math.round(last.leaks.noshow), past_customers:Math.round(last.leaks.react)},
+      page: location.href
+    };
+    btn.disabled = true; show('Sending…');
+    fetch(hook, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)})
+      .then(function(r){
+        if (!r.ok) throw new Error('status ' + r.status);
+        show('Got it. We\'ll be in touch within one business day to start your audit.');
+        var booking = (root.dataset.booking || '').trim();
+        if (booking){ book.href = booking; book.hidden = false; }
+        lead.reset();
+      })
+      .catch(function(){ show('That didn\'t go through. Please try again, or contact us directly.', true); })
+      .then(function(){ btn.disabled = false; });
+  });
+})();
+</script>
