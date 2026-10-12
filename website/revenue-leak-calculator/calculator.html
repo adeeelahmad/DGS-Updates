@@ -182,10 +182,10 @@
         <li><div class="top"><span>No-shows</span><span class="amt" data-out="noshow">$0</span></div><div class="track"><div class="fill" data-bar="noshow"></div></div><span class="why" data-why="noshow"></span></li>
         <li><div class="top"><span>Past customers not coming back</span><span class="amt" data-out="react">$0</span></div><div class="track"><div class="fill" data-bar="react"></div></div><span class="why" data-why="react"></span></li>
       </ul>
-      <p class="rlc-note">This is an estimate based on the numbers and assumptions you entered, not a promise of results. A free Revenue Leak Audit checks the real numbers: we call your business during and after hours, test your web form, and compare your reviews with your top competitors.</p>
+      <p class="rlc-note">This is an estimate based on the numbers and assumptions you entered, not a promise of results. Your free 90-Day Double-Revenue Plan checks the real numbers (we call your business during and after hours, test your web form and compare your reviews with your top competitors), then shows how fixing these leaks, adding new customers and bringing past customers back adds up to double your revenue.</p>
 
       <form class="rlc-lead" novalidate>
-        <h3>Get your free Revenue Leak Audit</h3>
+        <h3>Get your free 90-Day Double-Revenue Plan</h3>
         <div class="rlc-row two">
           <label for="rlc-name">Your name<input id="rlc-name" name="name" autocomplete="name" required></label>
           <label for="rlc-business">Business name<input id="rlc-business" name="business" autocomplete="organization" required></label>
@@ -194,11 +194,11 @@
         </div>
         <label for="rlc-site">Website<input id="rlc-site" name="website" type="url" inputmode="url" placeholder="https://"></label>
         <label class="rlc-check" for="rlc-consent"><input id="rlc-consent" name="consent" type="checkbox">
-          <span>I agree that <span data-brand-name>[Brand]</span> may contact me about my audit by phone, text or email, including automated texts. Consent isn't a condition of any purchase. Message and data rates may apply. Reply STOP to opt out.</span>
+          <span>I agree that <span data-brand-name>[Brand]</span> may contact me about my plan by phone, text or email, including automated texts. Consent isn't a condition of any purchase. Message and data rates may apply. Reply STOP to opt out.</span>
         </label>
-        <button class="rlc-btn" type="submit">Send me my audit</button>
+        <button class="rlc-btn" type="submit">Send me my plan</button>
         <p class="rlc-status" hidden></p>
-        <a class="rlc-btn rlc-book" href="#" target="_blank" rel="noopener" hidden>Book your audit call now</a>
+        <a class="rlc-btn rlc-book" href="#" target="_blank" rel="noopener" hidden>Book your plan call now</a>
       </form>
     </div>
   </div>
@@ -307,7 +307,7 @@
     fetch(hook, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)})
       .then(function(r){
         if (!r.ok) throw new Error('status ' + r.status);
-        show('Got it. We\'ll be in touch within one business day to start your audit.');
+        show('Got it. We\'ll be in touch within one business day to start your plan.');
         var booking = (root.dataset.booking || '').trim();
         if (booking){ book.href = booking; book.hidden = false; }
         lead.reset();

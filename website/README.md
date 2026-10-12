@@ -2,7 +2,7 @@
 
 ## Revenue Leak Calculator (`revenue-leak-calculator/`)
 
-A free calculator for the website. Visitors enter a few numbers and see an estimate of what they lose each month to missed calls, slow follow-up, no-shows and past customers. Then they can request a free Revenue Leak Audit.
+A free calculator for the website. Visitors enter a few numbers and see an estimate of what they lose each month to missed calls, slow follow-up, no-shows and past customers. Then they can request a free 90-Day Double-Revenue Plan.
 
 | File | Use it for |
 |---|---|
@@ -15,7 +15,7 @@ All settings are attributes on the `<div class="rlc" …>` line near the top of 
 
 | Attribute | What to put | Example |
 |---|---|---|
-| `data-webhook` | The address that receives each audit request as JSON | Your GoHighLevel inbound webhook URL |
+| `data-webhook` | The address that receives each plan request as JSON | Your GoHighLevel inbound webhook URL |
 | `data-booking` | Calendar link shown after someone submits | Your GHL booking page |
 | `data-brand` | Your agency name (used in the consent text) | `Ironclad Growth` |
 | `data-lock="light"` | Keeps it light even in dark mode. Delete to follow the visitor's device. | — |
